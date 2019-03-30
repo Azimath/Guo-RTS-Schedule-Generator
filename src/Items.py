@@ -5,7 +5,7 @@ class Task:
     def __init__(self, phase, period, executionCost, relativeDeadline):
         self.phase = phase
         self.period = period
-        self.excutionCost = executionCost
+        self.executionCost = executionCost
         self.relativeDeadline = relativeDeadline
 
     def createJobs(self, startTime, endTime): #Return a list of all jobs that release in a certain window
@@ -13,13 +13,16 @@ class Task:
         jobsReleased = []
 
         while currentRelease < endTime:
-            jobsReleased.append(Job(currentRelease, currentRelease+self.relativeDeadline, self.excutionCost))
+            jobsReleased.append(Job(currentRelease, currentRelease+self.relativeDeadline, self.executionCost))
             currentRelease += self.period
 
         return jobsReleased
 
+    def utilization(self): #Simple global utilization
+        return self.executionCost/self.period
+
     def __repr__(self):
-        return "Task({},{},{},{})".format(self.phase, self.period, self.excutionCost, self.relativeDeadline)
+        return "Task({},{},{},{})".format(self.phase, self.period, self.executionCost, self.relativeDeadline)
 
     def __str__(self):
         return self.__repr__()
