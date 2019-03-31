@@ -7,12 +7,12 @@ import random
 
 #Create a list of n tasks which has a utilization less than 1 and integer periods/costs
 #This is probably really expensive
-def createTasks(nTasks, LCMEffort=40):
+def createTasks(nTasks, LCMEffort=40, minCost=1):
     tasks = []
     
     #Create first task
-    taskPeriod = random.randrange(10, 10000, 2)
-    taskCost = random.randrange(1, taskPeriod)
+    taskPeriod = random.randrange(max(minCost, 10), 10000, 2)
+    taskCost = random.randrange(minCost, taskPeriod)
     totalUtilization = taskCost/taskPeriod
 
     tasks.append(Task(0, taskPeriod, taskCost, taskPeriod)) #0 phase, implicit deadline
@@ -24,13 +24,13 @@ def createTasks(nTasks, LCMEffort=40):
         #Try to pick a new period that keeps the hyperperiod to a minimum
         taskPeriod = min([p for p in [random.randrange(10, 10000, 2) for _ in range(LCMEffort)]], key = lambda p: lcm(p, currentHyperPeriod))
 
-        while((1-totalUtilization)*taskPeriod<1): #Make other tasks shorter to make sure the new task has at least 1 time to execute
+        while((1-totalUtilization)*taskPeriod<minCost): #Make other tasks shorter to make sure the new task has at least 1 time to execute
             shorten = random.randrange(0, len(tasks))
             totalUtilization -= tasks[shorten].utilization()
             tasks[shorten].executionCost -= 1 #Should be enough to squeeze in a new task but we can try again if we need
             totalUtilization += tasks[shorten].utilization()
 
-        taskCost = random.randrange(1, min(int(taskPeriod*(1-totalUtilization))+1,taskPeriod)) #Ensure the task can't make the utilization more than 1
+        taskCost = random.randrange(minCost, min(int(taskPeriod*(1-totalUtilization))+1,taskPeriod)) #Ensure the task can't make the utilization more than 1
 
         totalUtilization +=  taskCost/taskPeriod
 
