@@ -12,13 +12,13 @@ def scaleTaskCosts(taskSet, costScaleFactor, fixedCost=0):
     return [Task(t.phase, t.period, int(t.executionCost*costScaleFactor), t.relativeDeadline, t.extraCost) for t in taskSet]
 
 #Create a list of n tasks which has a utilization less than 1 and integer periods/costs
-def createRandomTasks(nTasks, LCMEffort=40, extraCost=0, maxExecutionCost=100, utilizationScale=1):
+def createRandomTasks(nTasks, LCMEffort=40, extraCost=0, maxExecutionCost=100, maxUtilization=1):
     tasks = []
     
     #Create first task
     
     taskCost = random.randrange(10, maxExecutionCost)
-    taskPeriod = random.randrange(utilizationScale*(taskCost+1)+extraCost, 100*(utilizationScale*(taskCost+1)+extraCost), 2)
+    taskPeriod = random.randrange(taskCost+1+extraCost, 100*(taskCost+1)+extraCost, 2)
     tasks.append(Task(0, taskPeriod, taskCost, taskPeriod, extraCost)) #0 phase, implicit deadline
     totalUtilization = tasks[-1].preemptUtilization()
 
@@ -28,14 +28,15 @@ def createRandomTasks(nTasks, LCMEffort=40, extraCost=0, maxExecutionCost=100, u
         
         taskCost = random.randrange(10, 10000)
         #Try to pick a new period that keeps the hyperperiod to a minimum
-        taskPeriod = min([p for p in [random.randrange(utilizationScale*(taskCost+1)+extraCost, 100*(utilizationScale*(taskCost+1)+extraCost), 2) for _ in range(LCMEffort)]], key = lambda p: lcm(p, currentHyperPeriod))
+        #We do this by generating some random periods and picking the one that gives the lowest LCM if it was added
+        taskPeriod = min([p for p in [random.randrange(taskCost+1+extraCost, 100*(taskCost+1)+extraCost, 2) for _ in range(LCMEffort)]], key = lambda p: lcm(p, currentHyperPeriod))
         currentHyperPeriod = lcm(taskPeriod, currentHyperPeriod)
         tasks.append(Task(0, taskPeriod, taskCost, taskPeriod, extraCost))
 
         totalUtilization +=  tasks[-1].preemptUtilization()
 
         shortenAttempts = 0
-        while(totalUtilization > 1) and shortenAttempts < LCMEffort*10: #Make other tasks shorter to make sure the new task has at least 1 time to execute
+        while(totalUtilization > maxUtilization) and shortenAttempts < LCMEffort*10: #Make other tasks shorter to make sure the new task has some time
             shortenAttempts += 1 #If we can't shorten tasks enough, stop trying
             shorten = random.randrange(0, len(tasks))
             if tasks[shorten].executionCost > 20:
