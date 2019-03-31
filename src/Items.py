@@ -2,24 +2,31 @@
 import math
 
 class Task:
-    def __init__(self, phase, period, executionCost, relativeDeadline):
+    def __init__(self, phase, period, executionCost, relativeDeadline, extraCost):
         self.phase = phase
         self.period = period
         self.executionCost = executionCost
         self.relativeDeadline = relativeDeadline
+        self.extraCost = extraCost
 
     def createJobs(self, startTime, endTime): #Return a list of all jobs that release in a certain window
         currentRelease = self.period*math.floor((startTime-self.phase)/self.period) #Determine when the first job releases
         jobsReleased = []
 
         while currentRelease < endTime:
-            jobsReleased.append(Job(currentRelease, currentRelease+self.relativeDeadline, self.executionCost))
+            jobsReleased.append(Job(currentRelease, currentRelease+self.relativeDeadline, self.executionCost+self.extraCost))
             currentRelease += self.period
 
         return jobsReleased
 
-    def utilization(self): #Simple global utilization
+    def rawUtilization(self): #Simple global utilization
         return self.executionCost/self.period
+    
+    def preemptUtilization(self): #Global utilization including preempt cost
+        return (self.executionCost+self.extraCost)/self.period
+
+    def timeRequired(self):
+        return (self.executionCost+self.extraCost)
 
     def __repr__(self):
         return "Task({},{},{},{})".format(self.phase, self.period, self.executionCost, self.relativeDeadline)

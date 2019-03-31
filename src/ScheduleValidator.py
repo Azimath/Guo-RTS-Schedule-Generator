@@ -4,7 +4,7 @@ import math, ExtraMath
 def measureUtilization(taskSet):
     u = 0
     for t in taskSet:
-        u +=  t.utilization()
+        u +=  t.rawUtilization()
     return u
 
 def findHyperperiod(taskSet):
@@ -26,11 +26,13 @@ def checkSchedule(tasks, preemption):
     #Check NP-EDF using Jeffay et al 1991
 
     tasks.sort(key=lambda x: x.period)
+    taskParams = [(t.period,t.timeRequired()) for t in tasks]
+
     #Check demand, last task should always have the more demand so just check that
-    for L in range(tasks[1].period, tasks[-1].period):
-        demand = tasks[-1].executionCost
-        for t in tasks[:-1]:
-            demand += math.floor((L-1)/t.period)*t.executionCost
+    for L in range(taskParams[1][0], taskParams[-1][0]):
+        demand = tasks[-1].timeRequired()
+        for t in taskParams[:-1]:
+            demand += ((L-1)//t[0])*t[1] #Use integer division to replace floor()
         if demand > L:
             return False
 
