@@ -5,9 +5,14 @@ from Items import Job, Task
 from ExtraMath import gcd, lcm
 import random
 
+#Take a list of tasks and return a list of the same tasks with the execution costs scaled by some factor
+#fixedCost is any cost like preemption that is always the same
+#Restrict to integer time for now
+def scaleTaskCosts(taskSet, costScaleFactor, fixedCost=0):
+    return [Task(t.phase, t.period, int(((t.executionCost-fixedCost)*costScaleFactor)+fixedCost), t.relativeDeadline) for t in taskSet]
+
 #Create a list of n tasks which has a utilization less than 1 and integer periods/costs
-#This is probably really expensive
-def createTasks(nTasks, LCMEffort=40, minCost=1):
+def createRandomTasks(nTasks, LCMEffort=40, minCost=1):
     tasks = []
     
     #Create first task
@@ -40,7 +45,7 @@ def createTasks(nTasks, LCMEffort=40, minCost=1):
 
 if __name__ == "__main__": #Run the task creation a bunch of times and see if it works
     for x in range(1000):
-        tasks=createTasks(5)
+        tasks=createRandomTasks(5)
         l = 1
         for t in tasks:
             l = lcm(l, t.period)
