@@ -1,12 +1,14 @@
 from ScheduleGenerator import createRandomTasks, scaleTaskCosts
 from ScheduleValidator import checkSchedule, measureUtilization
 
-def findAverageBreakdown(preemption, preemptCost):
+import multiprocessing
+
+def findAverageBreakdown(preemption, preemptCost, numIterations):
     if not preemption:
         preemptCost = 0 #If we can't preempt there isn't a cost
 
     breakdownUtilizations = []
-    for i in range(10):
+    for i in range(numIterations):
         taskSet = createRandomTasks(5, extraCost = preemptCost)
         while not checkSchedule(taskSet, preemption):
             taskSet = createRandomTasks(5, extraCost = preemptCost)
@@ -27,9 +29,19 @@ def findAverageBreakdown(preemption, preemptCost):
                 largeCostScale = (smallCostScale + largeCostScale)/2
 
         breakdownUtilizations.append(measureUtilization(scaleTaskCosts(taskSet, smallCostScale, preemptCost)))
-        print(i)
 
     return sum(breakdownUtilizations)/len(breakdownUtilizations)
 
 if __name__ == "__main__":
-    print(findAverageBreakdown(False, 60))
+
+    #Some magic to make multiprocessing work
+    def breakdownUnpack(args):
+        return findAverageBreakdown(*args)
+
+    #Use multiprocessing to make workers that each do some trials
+    num_workers = 7
+    trials_per_worker = 5
+    pool = multiprocessing.Pool(num_workers)
+    results = pool.map(breakdownUnpack, [(False, 60, trials_per_worker)]*num_workers)
+
+    print(sum(results)/len(results)) #Average together results from all worker processes
