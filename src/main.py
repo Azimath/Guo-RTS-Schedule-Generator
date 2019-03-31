@@ -26,7 +26,7 @@ def findAverageBreakdown(preemption, preemptCost, numIterations, workerNumber=0)
             else:
                 largeCostScale = (smallCostScale + largeCostScale)/2
 
-        print("Worker {} is {}/{}".format(workerNumber, i, numIterations))
+        print("Worker {} is {}/{}".format(workerNumber, i+1, numIterations))
 
         breakdownUtilizations.append(measureUtilization(scaleTaskCosts(taskSet, smallCostScale, preemptCost)))
 
@@ -42,8 +42,13 @@ if __name__ == "__main__":
 
     #Use multiprocessing to make workers that each do some trials
     num_workers = 7
-    trials_per_worker = 20
+    trials_per_worker = 40
+
+    #Options for scheduling type/costs
+    context_switch_cost = 1006
+    preemption_allowed = False
+
     pool = multiprocessing.Pool(num_workers)
-    results = pool.map(breakdownUnpack, product([(False, 60, trials_per_worker)]*num_workers, range(num_workers)))
+    results = pool.map(breakdownUnpack, product([(preemption_allowed, context_switch_cost, trials_per_worker)]*num_workers, range(num_workers)))
 
     print(sum(results)/len(results)) #Average together results from all worker processes
