@@ -27,13 +27,17 @@ def checkSchedule(tasks, preemption):
 
     tasks.sort(key=lambda x: x.period)
     #Check demand, last task should always have the more demand so just check that
-    for L in range(1, tasks[-1].period):
+    for L in range(tasks[1].period, tasks[-1].period):
         demand = tasks[-1].executionCost
         for t in tasks[:-1]:
             demand += math.floor((L-1)/t.period)*t.executionCost
-        
         if demand > L:
             return False
 
     #NP-EDF check didn't show any problems
     return True
+
+if __name__ == "__main__":
+    import ScheduleGenerator
+
+    print(checkSchedule(ScheduleGenerator.createRandomTasks(5), False))
