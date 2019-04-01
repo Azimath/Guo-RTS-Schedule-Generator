@@ -1,10 +1,13 @@
 #Module to do more robust schedule check
 import math, ExtraMath
 
-def measureUtilization(taskSet):
+def measureUtilization(taskSet, raw=True):
     u = 0
     for t in taskSet:
-        u +=  t.rawUtilization()
+        if raw:
+            u +=  t.rawUtilization()
+        else:
+            u +=  t.preemptUtilization()
     return u
 
 def findHyperperiod(taskSet):
@@ -17,7 +20,7 @@ def findHyperperiod(taskSet):
 #Takes a list of Task()s and preemption enabled then returns a true or false for schedulability
 #Only supports EDF or NP-EDF
 def checkSchedule(tasks, preemption):
-    u = measureUtilization(tasks)
+    u = measureUtilization(tasks, raw=False)
     if u > 1:
         return False
     elif preemption: #Preemptive EDF can schedule anything with U<1
@@ -30,7 +33,7 @@ def checkSchedule(tasks, preemption):
 
     #Check demand, last task should always have the more demand so just check that
     for L in range(taskParams[1][0], taskParams[-1][0]):
-        demand = tasks[-1].timeRequired()
+        demand = taskParams[-1][1]
         for t in taskParams[:-1]:
             demand += ((L-1)//t[0])*t[1] #Use integer division to replace floor()
         if demand > L:

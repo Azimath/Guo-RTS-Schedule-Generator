@@ -8,7 +8,7 @@ import random
 #Take a list of tasks and return a list of the same tasks with the execution costs scaled by some factor
 #fixedCost is any cost like preemption that is always the same
 #Restrict to integer time for now
-def scaleTaskCosts(taskSet, costScaleFactor, fixedCost=0):
+def scaleTaskCosts(taskSet, costScaleFactor):
     return [Task(t.phase, t.period, int(t.executionCost*costScaleFactor), t.relativeDeadline, t.extraCost) for t in taskSet]
 
 #Create a list of n tasks which has a utilization less than 1 and integer periods/costs
@@ -20,7 +20,7 @@ def createRandomTasks(nTasks, LCMEffort=40, extraCost=0, maxExecutionCost=1000, 
     taskCost = random.randrange(10, maxExecutionCost)
     taskPeriod = random.randrange(taskCost+1, 100*(taskCost+1), 2)
     tasks.append(Task(0, taskPeriod, taskCost, taskPeriod, extraCost)) #0 phase, implicit deadline
-    totalUtilization = tasks[-1].preemptUtilization()
+    totalUtilization = tasks[-1].rawUtilization()
 
     currentHyperPeriod = taskPeriod
 
